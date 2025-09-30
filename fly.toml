@@ -1,0 +1,24 @@
+# Fly.io configuration for frontend service
+# Run: fly launch --dockerfile services/frontend/Dockerfile
+
+app = "comment-frontend"
+primary_region = "sjc"
+
+[build]
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[env]
+  DJANGO_SETTINGS_MODULE = "frontend.settings"
+  DEBUG = "False"
