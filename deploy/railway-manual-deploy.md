@@ -17,6 +17,7 @@ Since the CLI approach had some issues, here's a step-by-step guide to deploy th
    - **Root Directory**: `services/frontend`
    - **Build Command**: Leave empty (uses Dockerfile)
    - **Start Command**: `gunicorn --bind 0.0.0.0:$PORT frontend.wsgi:application`
+   - **Dockerfile Path**: `Dockerfile` (should auto-detect)
 
 ### 2.2 Configure Environment Variables
 In the frontend service settings, add these variables:
@@ -108,7 +109,13 @@ USERS_BASE_URL=https://your-actual-users-url.railway.app
 
 ### Common Issues:
 
-1. **Build Failures**:
+1. **Build Failures - "requirements.txt not found"**:
+   - **Problem**: Railway can't find requirements.txt
+   - **Solution**: Make sure "Root Directory" is set to `services/frontend`
+   - **Check**: The Dockerfile should be in the same directory as requirements.txt
+   - **Verify**: In Railway dashboard, go to Settings → Build & Deploy → Root Directory
+
+2. **Build Failures - General**:
    - Check that the root directory is correct
    - Verify Dockerfile exists in the specified directory
    - Check build logs for specific errors

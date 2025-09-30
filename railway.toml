@@ -1,6 +1,7 @@
 [build]
 builder = "dockerfile"
 dockerfilePath = "services/frontend/Dockerfile"
+dockerContext = "services/frontend"
 
 [deploy]
 startCommand = "gunicorn --bind 0.0.0.0:$PORT frontend.wsgi:application"
