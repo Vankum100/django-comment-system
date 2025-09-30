@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, sans-serif; margin: 0; background:#0b1020; color:#e8ecf1; }
+    header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:#0f1530; border-bottom:1px solid #1e2748; position:sticky; top:0; }
+    a { color:#9cc1ff; text-decoration:none; }
+    nav a { margin-right:16px; }
+    .container { max-width:960px; margin:32px auto; padding:0 16px; }
+    .hero { background:linear-gradient(135deg,#1a2358 0%, #10203f 100%); border:1px solid #22306a; border-radius:12px; padding:32px; box-shadow:0 10px 30px rgba(0,0,0,0.25); }
+    .hero h1 { margin:0 0 8px; font-size:28px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:24px; }
+    .card { background:#0f1530; border:1px solid #1e2748; border-radius:10px; padding:16px; }
+    footer { text-align:center; color:#99a7bf; padding:24px; }
+    .auth a { margin-left:12px; }
+  </style>
+  </head>
+<body>
+  <header>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/about/">About</a>
+      <a href="/comments/">Comments</a>
+      <a href="/feedback/">Feedback</a>
+    </nav>
+    <div class="auth">
+      {% if user.is_authenticated %}
+        <span>Hello, {{ user.username }}</span>
+        <a href="/accounts/logout/">Sign out</a>
+      {% else %}
+        <a href="/accounts/login/">Login</a>
+        <a href="/accounts/signup/">Register</a>
+      {% endif %}
+    </div>
+  </header>
+  <div class="container">
+    <div class="hero">
+      <h1>Welcome</h1>
+      <p>This is the frontend gateway for Users and Comments services.</p>
+      <div class="grid">
+        <div class="card">
+          <h3>Users</h3>
+          <p>Register, login, and manage your account.</p>
+        </div>
+        <div class="card">
+          <h3>Comments</h3>
+          <p>View and post comments powered by the comments microservice.</p>
+        </div>
+      </div>
+      
+      {% if all_comments %}
+        <div style="margin-top: 32px;">
+          <h2>Recent Comments</h2>
+          <div style="max-height: 400px; overflow-y: auto;">
+            {% for comment in all_comments %}
+              <div class="card" style="margin-bottom: 12px;">
+                <div style="font-weight: 600; color: #9cc1ff;">{{ comment.author }}</div>
+                <div style="margin: 8px 0;">{{ comment.text }}</div>
+                <div style="font-size: 12px; color: #9aa5c3;">{{ comment.created_at }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <footer>
+    Built with Django microservices.
+  </footer>
+</body>
+</html>
+
+

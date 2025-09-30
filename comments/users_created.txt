@@ -1,0 +1,6 @@
+USERS :
+john 
+peter
+
+PASSWORD:
+sw9*t67*

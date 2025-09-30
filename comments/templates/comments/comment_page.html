@@ -1,0 +1,114 @@
+{% extends "comments/base.html" %}
+
+{% block content %}
+<h1>Real-time Comments</h1>
+
+{% if user.is_authenticated %}
+<div class="user-info">
+    Welcome, <strong>{{ user.username }}</strong>!
+</div>
+<div id="comment-form">
+    <textarea id="comment-text" rows="4" cols="50"></textarea><br>
+    <button id="submit-comment">Submit Comment</button>
+</div>
+{% else %}
+<p>Please <a href="{% url 'login' %}?next={{ request.path }}">login</a> to post comments.</p>
+{% endif %}
+
+<div id="comments-list">
+    {% for comment in comments %}
+    <div class="comment" data-comment-id="{{ comment.id }}">
+        <p><strong>{{ comment.user.username }}</strong> ({{ comment.created_at }})</p>
+        <p>{{ comment.text }}</p>
+        <hr>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+$(document).ready(function() {
+    // CSRF token function
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Submit comment
+    $('#submit-comment').click(function() {
+        const text = $('#comment-text').val();
+        $.ajax({
+            url: '/add_comment/',
+            type: 'POST',
+            data: JSON.stringify({'text': text}),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            success: function(response) {
+                const commentHtml = `
+                    <div class="comment" data-comment-id="${response.id}">
+                        <p><strong>${response.user}</strong> (${response.created_at})</p>
+                        <p>${response.text}</p>
+                        <hr>
+                    </div>
+                `;
+                $('#comments-list').prepend(commentHtml);
+                $('#comment-text').val('');
+            },
+            error: function(xhr) {
+                if(xhr.status === 403) {
+                    alert('Please login to post comments');
+                    window.location.href = '/accounts/login/?next=' + window.location.pathname;
+                } else {
+                    alert('Error: ' + (xhr.responseJSON?.error || 'Unknown error'));
+                }
+            }
+        });
+    });
+
+    // Real-time polling for new comments
+    let lastCommentId = {{comments.first.id | default:0 }};
+    
+    function checkNewComments() {
+        $.ajax({
+            url: '/get_new_comments/',
+            type: 'GET',
+            data: { last_id: lastCommentId },
+            success: function(response) {
+                if(response.comments && response.comments.length > 0) {
+                    response.comments.forEach(comment => {
+                        if(!$(`[data-comment-id="${comment.id}"]`).length) {
+                            const commentHtml = `
+                                <div class="comment" data-comment-id="${comment.id}">
+                                    <p><strong>${comment.user}</strong> (${comment.created_at})</p>
+                                    <p>${comment.text}</p>
+                                    <hr>
+                                </div>
+                            `;
+                            $('#comments-list').prepend(commentHtml);
+                        }
+                    });
+                    lastCommentId = response.comments[0].id;
+                }
+            },
+            complete: function() {
+                setTimeout(checkNewComments, 5000); // Check every 5 seconds
+            }
+        });
+    }
+
+    // Start polling
+    checkNewComments();
+});
+</script>
+{% endblock %}
