@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "services/frontend/requirements.txt",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "services/frontend/manage.py"
+    }
+  ],
+  "env": {
+    "DJANGO_SETTINGS_MODULE": "frontend.settings",
+    "DEBUG": "False"
+  }
+}
