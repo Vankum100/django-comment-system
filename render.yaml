@@ -1,0 +1,78 @@
+services:
+  - type: web
+    name: comment-frontend
+    env: docker
+    dockerfilePath: ./services/frontend/Dockerfile
+    dockerContext: ./services/frontend
+    plan: starter
+    region: oregon
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: frontend.settings
+      - key: COMMENTS_BASE_URL
+        value: https://comment-comments.onrender.com
+      - key: USERS_BASE_URL
+        value: https://comment-users.onrender.com
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "comment-frontend.onrender.com"
+    healthCheckPath: /
+    autoDeploy: true
+
+  - type: web
+    name: comment-users
+    env: docker
+    dockerfilePath: ./services/users/Dockerfile
+    dockerContext: ./services/users
+    plan: starter
+    region: oregon
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: users_service.settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "comment-users.onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: comment-db
+          property: connectionString
+    healthCheckPath: /
+    autoDeploy: true
+
+  - type: web
+    name: comment-comments
+    env: docker
+    dockerfilePath: ./services/comments/Dockerfile
+    dockerContext: ./services/comments
+    plan: starter
+    region: oregon
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: comments_service.settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "comment-comments.onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: comment-db
+          property: connectionString
+    healthCheckPath: /
+    autoDeploy: true
+
+databases:
+  - name: comment-db
+    plan: starter
+    region: oregon
